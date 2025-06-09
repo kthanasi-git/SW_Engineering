@@ -1,0 +1,37 @@
+#include <iostream>
+#include <string>
+
+// Domain class representing a sale
+class Sale {
+private:
+    std::string itemName;
+    double price;
+
+public:
+    Sale(const std::string& itemName, double price)
+        : itemName(itemName), price(price) {}
+
+    std::string getItemName() const { return itemName; }
+    double getPrice() const { return price; }
+};
+
+// "Pure Fabrication" class responsible for storing Sale objects
+class SaleStorage {
+public:
+    static void saveSale(const Sale& sale) {
+        // For demonstration, we'll just print out the sale details.
+        // In a real application, this might connect to a database or write to a file.
+        std::cout << "Saving sale for item: " << sale.getItemName()
+                  << " with price: $" << sale.getPrice() << std::endl;
+    }
+};
+
+int main() {
+    // Create a Sale object
+    Sale mySale("Laptop", 999.99);
+
+    // Use the fabricated SaleStorage class to save the Sale
+    SaleStorage::saveSale(mySale);
+
+    return 0;
+}

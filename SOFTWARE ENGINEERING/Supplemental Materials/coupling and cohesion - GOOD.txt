@@ -1,0 +1,56 @@
+#include <iostream>
+
+using namespace std;
+
+// Payment Class
+class Payment {
+public:
+    Payment(double amount) : amount(amount) {
+        cout << "Payment of $" << amount << " created.\n";
+    }
+
+    void process() {
+        cout << "Processing payment of $" << amount << ".\n";
+    }
+
+private:
+    double amount;
+};
+
+// Sale Class (Internally Creates Payment)
+class Sale {
+public:
+    Sale(double total) : totalAmount(total), payment(nullptr) {}
+
+    void makePayment() {
+        cout << "Sale creates the Payment (GOOD DESIGN!)\n";
+        payment = new Payment(totalAmount); // Sale is responsible for Payment creation
+        payment->process();
+    }
+
+    ~Sale() {
+        delete payment; // Free memory when Sale is destroyed
+    }
+
+private:
+    double totalAmount;
+    Payment* payment;
+};
+
+// Register Class (Delegates to Sale)
+class Register {
+public:
+    void makePaymentForSale(Sale& sale) {
+        cout << "Register delegates payment creation to Sale.\n";
+        sale.makePayment();
+    }
+};
+
+int main() {
+    Register registerObj;
+    Sale saleObj(100.50); // Sale of $100.50
+
+    registerObj.makePaymentForSale(saleObj); // Register initiates the payment process
+
+    return 0;
+}

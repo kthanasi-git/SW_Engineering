@@ -1,0 +1,28 @@
+#include <iostream>
+
+using namespace std;
+
+// Sale Class (Handles Business Logic)
+class Sale {
+public:
+    void makeLineItem(string upc, int qty) {
+        cout << "Sale: Adding item with UPC " << upc << " and quantity " << qty << ".\n";
+    }
+};
+
+// UI Class (BAD DESIGN: Directly Calls Business Logic)
+class POSTApplet {
+public:
+    void onEnterItem(string upc, int qty) {
+        cout << "POSTApplet: Handling user input (BAD DESIGN!)\n";
+        Sale sale; // UI directly interacts with domain logic (bad practice)
+        sale.makeLineItem(upc, qty);
+    }
+};
+
+int main() {
+    POSTApplet ui;
+    ui.onEnterItem("123456", 2); // UI directly calls Sale
+
+    return 0;
+}

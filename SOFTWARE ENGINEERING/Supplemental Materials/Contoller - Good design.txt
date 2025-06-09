@@ -1,0 +1,54 @@
+#include <iostream>
+
+using namespace std;
+
+// Sale Class (Handles Business Logic)
+class Sale {
+public:
+    void makeLineItem(string upc, int qty) {
+        cout << "Sale: Adding item with UPC " << upc << " and quantity " << qty << ".\n";
+    }
+};
+
+// Controller Class (GOOD DESIGN: Separates UI from Business Logic)
+class Controller {
+public:
+    Controller() {
+        sale = new Sale(); // Controller owns business logic
+    }
+
+    void enterItem(string upc, int qty) {
+        cout << "Controller: Processing user request.\n";
+        sale->makeLineItem(upc, qty); // Delegates to Sale (Domain Layer)
+    }
+
+    ~Controller() {
+        delete sale;
+    }
+
+private:
+    Sale* sale;
+};
+
+// UI Class (Only Talks to Controller)
+class POSTApplet {
+public:
+    POSTApplet(Controller* controller) : controller(controller) {}
+
+    void onEnterItem(string upc, int qty) {
+        cout << "POSTApplet: User pressed Enter Item button.\n";
+        controller->enterItem(upc, qty); // UI delegates to Controller
+    }
+
+private:
+    Controller* controller;
+};
+
+int main() {
+    Controller controller;
+    POSTApplet ui(&controller);
+
+    ui.onEnterItem("123456", 2); // UI calls Controller instead of Sale directly
+
+    return 0;
+}

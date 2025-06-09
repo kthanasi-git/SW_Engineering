@@ -1,0 +1,71 @@
+#include <iostream>
+
+// Payment class holds the amount tendered.
+class Payment {
+private:
+    float amountTendered;
+public:
+    Payment(float amount) : amountTendered(amount) {}
+
+    float getAmountTendered() const {
+        return amountTendered;
+    }
+};
+
+// Sale class holds a reference to a Payment, but hides its details.
+// It provides a method to retrieve the payment amount.
+class Sale {
+private:
+    Payment* payment;
+public:
+    // Constructor takes a pointer to Payment.
+    Sale(Payment* paymentPtr) : payment(paymentPtr) {}
+
+    // Provides the payment amount without exposing the Payment object.
+    float paymentAmount() const {
+        return payment->getAmountTendered();
+    }
+};
+
+// POST class references a Sale. It is created using a default constructor.
+class POST {
+private:
+    Sale* sale;
+public:
+    // Default constructor creates a POST without any parameters.
+    POST() : sale(nullptr) {}
+
+    // Setter method to assign the Sale.
+    void setSale(Sale* salePtr) {
+        sale = salePtr;
+    }
+
+    // GOOD DESIGN: POST only interacts with Sale, not directly with Payment.
+    float paymentAmount() const {
+        if (sale != nullptr) {
+            return sale->paymentAmount();
+        }
+        return 0.0f; // Handle the case where sale is not set.
+    }
+};
+
+int main() {
+    // Create a Payment object.
+    Payment* payment = new Payment(50.0f);
+
+    // Create a Sale object that holds the Payment.
+    Sale* sale = new Sale(payment);
+
+    // Create a POST object using the default constructor.
+    POST post;
+    post.setSale(sale);
+
+    // Demonstrate the good design: POST doesn't directly access Payment.
+    std::cout << "Payment Amount (Good Design): " << post.paymentAmount() << std::endl;
+
+    // Cleanup: Delete dynamically allocated objects.
+    delete sale;
+    delete payment;
+
+    return 0;
+}

@@ -1,0 +1,105 @@
+//Domain Class (CreditAuthorizationService): Focuses on the business logic of authorizing a payment. It calls modem methods but remains //unaware of the OS-level implementation details.
+
+//Modem Class: Serves as the indirection (or proxy) layer. It provides a stable interface to the domain class while delegating actual //operations to the OS API.
+
+//OSModemAPI: Represents the low-level, device-specific operations. This is kept separate from the domain logic to avoid tight coupling //and improve maintainability.
+
+
+#include <iostream>
+#include <string>
+
+// Simulated OS-level API for interacting with the modem device
+class OSModemAPI {
+public:
+    static void OS_dial(const std::string& phoneNumber) {
+        std::cout << "OS: Dialing " << phoneNumber << "..." << std::endl;
+    }
+
+    static void OS_send(const std::string& data) {
+        std::cout << "OS: Sending data -> " << data << std::endl;
+    }
+
+    static std::string OS_receive() {
+        // For demonstration, we'll just return a fixed response
+        std::string response = "AUTH_OK";
+        std::cout << "OS: Received response -> " << response << std::endl;
+        return response;
+    }
+
+    static void OS_hangup() {
+        std::cout << "OS: Hanging up the modem." << std::endl;
+    }
+};
+
+// Indirection layer that provides a consistent interface for modem operations
+// and hides OS-specific details from the domain classes.
+class Modem {
+public:
+    void dial(const std::string& phoneNumber) {
+        // Forward the call to the OS-level API
+        OSModemAPI::OS_dial(phoneNumber);
+    }
+
+    void send(const std::string& data) {
+        // Forward the call to the OS-level API
+        OSModemAPI::OS_send(data);
+    }
+
+    std::string receive() {
+        // Forward the call to the OS-level API
+        return OSModemAPI::OS_receive();
+    }
+
+    void hangup() {
+        // Forward the call to the OS-level API
+        OSModemAPI::OS_hangup();
+    }
+};
+
+// Domain class responsible for authorizing credit payments
+// It relies on the Modem interface rather than directly calling OS functions.
+class CreditAuthorizationService {
+private:
+    Modem& modem;  // Reference to the Modem (indirection layer)
+
+public:
+    // Inject the Modem dependency through the constructor
+    CreditAuthorizationService(Modem& modemRef) : modem(modemRef) {}
+
+    bool authorizePayment(double amount) {
+        // The domain class doesn't handle low-level modem details
+        modem.dial("1-800-CREDIT");
+
+        // Construct a simple payment message
+        std::string message = "PAYMENT: " + std::to_string(amount);
+        modem.send(message);
+
+        // Get a response from the Modem (which delegates to the OS)
+        std::string response = modem.receive();
+
+        // End the call
+        modem.hangup();
+
+        // Interpret the response
+        if (response == "AUTH_OK") {
+            std::cout << "Payment of $" << amount << " authorized." << std::endl;
+            return true;
+        } else {
+            std::cout << "Payment of $" << amount << " NOT authorized." << std::endl;
+            return false;
+        }
+    }
+};
+
+int main() {
+    // Create a Modem instance (our indirection layer)
+    Modem modem;
+
+    // Create the domain service, injecting the Modem dependency
+    CreditAuthorizationService authService(modem);
+
+    // Attempt to authorize a payment
+    authService.authorizePayment(99.99);
+
+    return 0;
+}

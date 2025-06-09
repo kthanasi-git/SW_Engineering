@@ -1,0 +1,83 @@
+#include <iostream>
+
+using namespace std;
+
+// Abstract Base Class (Polymorphism)
+class Payment {
+public:
+    virtual void authorize() = 0; // Pure virtual function
+    virtual ~Payment() {}
+};
+
+// Concrete Class: Check Payment
+class CheckPayment : public Payment {
+private:
+    string driverLicenseNum;
+public:
+    CheckPayment(string license) : driverLicenseNum(license) {
+        cout << "Check Payment created with Driver's License: " << driverLicenseNum << endl;
+    }
+    
+    void authorize() override {
+        cout << "Authorizing Check Payment using Driver's License: " << driverLicenseNum << endl;
+    }
+};
+
+// Concrete Class: Credit Payment
+class CreditPayment : public Payment {
+private:
+    string cardNumber;
+    string expiryDate;
+public:
+    CreditPayment(string ccNum, string expiry) : cardNumber(ccNum), expiryDate(expiry) {
+        cout << "Credit Payment created with Card Number: " << cardNumber << " and Expiry: " << expiryDate << endl;
+    }
+    
+    void authorize() override {
+        cout << "Authorizing Credit Payment using Card: " << cardNumber << " Expiry: " << expiryDate << endl;
+    }
+};
+
+// Sale Class (Handles Business Logic)
+class Sale {
+public:
+    void makeCheckPayment(string driverLicenseNum) {
+        cout << "Sale: Creating Check Payment...\n";
+        CheckPayment payment(driverLicenseNum); // Sale owns the payment object
+        payment.authorize(); // Sale authorizes it
+    }
+
+    void makeCreditPayment(string cardNumber, string expiryDate) {
+        cout << "Sale: Creating Credit Payment...\n";
+        CreditPayment payment(cardNumber, expiryDate); // Sale owns the payment object
+        payment.authorize(); // Sale authorizes it
+    }
+};
+
+// POST Class (Acts as Both UI and Controller)
+class POST {
+private:
+    Sale sale; // Composition: POST owns Sale
+public:
+    void makeCheckPayment(string driverLicenseNum) {
+        cout << "POST: Delegating Check Payment to Sale...\n";
+        sale.makeCheckPayment(driverLicenseNum); // Delegates to Sale
+    }
+
+    void makeCreditPayment(string cardNumber, string expiryDate) {
+        cout << "POST: Delegating Credit Payment to Sale...\n";
+        sale.makeCreditPayment(cardNumber, expiryDate); // Delegates to Sale
+    }
+};
+
+// Main Function
+int main() {
+    POST posSystem; // The POS system (POST) serves as the Controller
+
+    // Simulating user actions
+    posSystem.makeCheckPayment("D123456");
+    cout << "---------------------------\n";
+    posSystem.makeCreditPayment("4111-1111-1111-1111", "12/26");
+
+    return 0;
+}

@@ -1,0 +1,67 @@
+//Tight Coupling: The CreditAuthorizationService knows about OS-level API calls directly, making it harder to switch or mock out different //modem implementations.
+//Less Flexibility: Any change in the OS or device API requires modifications in the domain class.
+//Harder to Test: You cannot easily substitute a different modem implementation or a mock modem for testing.
+
+#include <iostream>
+#include <string>
+
+// Simulated OS-level API for interacting with the modem device
+class OSModemAPI {
+public:
+    static void OS_dial(const std::string& phoneNumber) {
+        std::cout << "OS: Dialing " << phoneNumber << "..." << std::endl;
+    }
+
+    static void OS_send(const std::string& data) {
+        std::cout << "OS: Sending data -> " << data << std::endl;
+    }
+
+    static std::string OS_receive() {
+        // For demonstration, we'll just return a fixed response
+        std::string response = "AUTH_OK";
+        std::cout << "OS: Received response -> " << response << std::endl;
+        return response;
+    }
+
+    static void OS_hangup() {
+        std::cout << "OS: Hanging up the modem." << std::endl;
+    }
+};
+
+// Domain class directly calling the OS-level API, without indirection
+class CreditAuthorizationService {
+public:
+    bool authorizePayment(double amount) {
+        // Directly calling the OS-level modem functions
+        OSModemAPI::OS_dial("1-800-CREDIT");
+
+        // Construct a simple payment message
+        std::string message = "PAYMENT: " + std::to_string(amount);
+        OSModemAPI::OS_send(message);
+
+        // Get a response from the OS API
+        std::string response = OSModemAPI::OS_receive();
+
+        // End the call
+        OSModemAPI::OS_hangup();
+
+        // Interpret the response
+        if (response == "AUTH_OK") {
+            std::cout << "Payment of $" << amount << " authorized." << std::endl;
+            return true;
+        } else {
+            std::cout << "Payment of $" << amount << " NOT authorized." << std::endl;
+            return false;
+        }
+    }
+};
+
+int main() {
+    // Create the domain service and directly call the OS API
+    CreditAuthorizationService authService;
+
+    // Attempt to authorize a payment
+    authService.authorizePayment(99.99);
+
+    return 0;
+}

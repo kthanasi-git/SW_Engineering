@@ -1,0 +1,73 @@
+#include <iostream>
+
+// Payment class holds the amount tendered.
+class Payment {
+private:
+    float amountTendered;
+public:
+    Payment(float amount) : amountTendered(amount) {}
+
+    float getAmountTendered() const {
+        return amountTendered;
+    }
+};
+
+// Sale class has a reference to a Payment.
+class Sale {
+private:
+    Payment* payment;
+public:
+    // Constructor takes a pointer to a Payment.
+    Sale(Payment* paymentPtr) : payment(paymentPtr) {}
+
+    // Exposes the Payment object directly (bad design).
+    Payment* getPayment() const {
+        return payment;
+    }
+};
+
+// POST class references a Sale.
+class POST {
+private:
+    Sale* sale;
+public:
+    // Default constructor: creates a POST without any parameters.
+    POST() : sale(nullptr) {}
+
+    // Setter method to assign the Sale.
+    void setSale(Sale* salePtr) {
+        sale = salePtr;
+    }
+
+    // BAD DESIGN: Directly accessing Payment through Sale.
+    float paymentAmount() const {
+        // "POST" -> "Sale" -> "Payment" -> "amountTendered"
+        if (sale != nullptr) {
+
+//The paymentAmount() method of POST reaches into the Sale to obtain its Payment and then calls getAmountTendered(). This is a violation //of “Don’t Talk to Strangers” because POST is directly interacting with an object (Payment) it shouldn't know about.
+            return sale->getPayment()->getAmountTendered();  
+        }
+        return 0.0f; // Or handle error appropriately.
+    }
+};
+
+int main() {
+    // Create a Payment object.
+    Payment* payment = new Payment(50.0f);
+
+    // Create a Sale object that refers to the Payment.
+    Sale* sale = new Sale(payment);
+
+    // Create a POST object using the default constructor (no parameters).
+    POST post;
+    post.setSale(sale);
+
+    // Demonstrate the violation of "Don't Talk to Strangers".
+    std::cout << "Payment Amount (Bad Design): " << post.paymentAmount() << std::endl;
+
+    // Cleanup.
+    delete payment;
+    delete sale;
+
+    return 0;
+}

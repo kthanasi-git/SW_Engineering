@@ -1,0 +1,51 @@
+#include <iostream>
+
+using namespace std;
+
+// Payment Class
+class Payment {
+public:
+    Payment(double amount) : amount(amount) {
+        cout << "Payment of $" << amount << " created.\n";
+    }
+
+    void process() {
+        cout << "Processing payment of $" << amount << ".\n";
+    }
+
+private:
+    double amount;
+};
+
+// Sale Class (Receives a Payment Object)
+class Sale {
+public:
+    void addPayment(Payment* p) {
+        cout << "Sale received the payment.\n";
+        payment = p;
+        payment->process();
+    }
+
+private:
+    Payment* payment;
+};
+
+// Register Class (BAD DESIGN: It creates Payment)
+class Register {
+public:
+    void makePaymentForSale(Sale& sale, double amount) {
+        cout << "Register creates the Payment (BAD DESIGN!)\n";
+        Payment* payment = new Payment(amount);  // Register is responsible for creating Payment (bad)
+        sale.addPayment(payment); // Register passes it to Sale
+        delete payment; // Free memory (but still bad design)
+    }
+};
+
+int main() {
+    Register registerObj;
+    Sale saleObj;
+
+    registerObj.makePaymentForSale(saleObj, 100.50); // Register initiates the payment process
+
+    return 0;
+}

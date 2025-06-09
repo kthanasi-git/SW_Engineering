@@ -1,0 +1,67 @@
+#include <iostream>
+#include <vector>
+
+class ProductSpecification {
+private:
+    std::string description;
+    double price;
+    std::string upc;
+    
+public:
+    ProductSpecification(double p, std::string desc = "", std::string u = "")
+        : price(p), description(desc), upc(u) {}
+        
+    double getPrice() const { return price; }
+};
+
+class SalesLineItem {
+private:
+    int quantity;
+    ProductSpecification* product;
+    
+public:
+    SalesLineItem(int qty, ProductSpecification* prod)
+        : quantity(qty), product(prod) {}
+        
+    double subtotal() const {
+        return quantity * product->getPrice();
+    }
+};
+
+class Sale {
+private:
+    std::vector<SalesLineItem> lineItems;
+    
+public:
+    void addLineItem(const SalesLineItem& item) {
+        lineItems.push_back(item);
+    }
+    
+    double total() const {
+        double sum = 0.0;
+        for(const auto& item : lineItems) {
+            sum += item.subtotal();
+        }
+        return sum;
+    }
+};
+
+int main() {
+    // Create product specifications
+    ProductSpecification prod1(25.0, "Book", "12345");
+    ProductSpecification prod2(15.5, "Pen", "67890");
+    
+    // Create sales line items
+    SalesLineItem line1(2, &prod1);
+    SalesLineItem line2(5, &prod2);
+    
+    // Create sale and add line items
+    Sale sale;
+    sale.addLineItem(line1);
+    sale.addLineItem(line2);
+    
+    // Calculate and display total
+    std::cout << "Total sale amount: $" << sale.total() << std::endl;
+    
+    return 0;
+}

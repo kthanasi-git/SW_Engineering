@@ -1,0 +1,147 @@
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
+
+using namespace std;
+
+/**
+ * Represents product details (UPC, name, price).
+ */
+class ProductSpecification {
+private:
+    int upc;
+    string name;
+    double price;
+public:
+    ProductSpecification() : upc(0), name(""), price(0.0) {}
+    ProductSpecification(int upc, const string &name, double price)
+        : upc(upc), name(name), price(price) {}
+
+    int getUpc() const { return upc; }
+    string getName() const { return name; }
+    double getPrice() const { return price; }
+};
+
+/**
+ * Holds a collection of product specifications.
+ * In a real system, this might do a database lookup.
+ */
+class ProductCatalog {
+private:
+    map<int, ProductSpecification> products;
+public:
+    ProductCatalog() {
+        // Sample data for demonstration
+        products[12345] = ProductSpecification(12345, "Apple", 0.50);
+        products[67890] = ProductSpecification(67890, "Banana", 0.30);
+    }
+
+    ProductSpecification specification(int upc) {
+        // Return a valid product if found, else a dummy placeholder
+        if (products.find(upc) != products.end()) {
+            return products[upc];
+        }
+        return ProductSpecification(upc, "UnknownProduct", 0.0);
+    }
+};
+
+/**
+ * Represents a single line item in a sale (one product + quantity).
+ */
+class SalesLineItem {
+private:
+    ProductSpecification spec;
+    int quantity;
+public:
+    SalesLineItem(const ProductSpecification &spec, int qty)
+        : spec(spec), quantity(qty) {}
+
+    void display() const {
+        cout << "Item: " << spec.getName()
+             << ", UPC: " << spec.getUpc()
+             << ", Qty: " << quantity
+             << ", UnitPrice: " << spec.getPrice()
+             << ", Subtotal: " << (spec.getPrice() * quantity)
+             << endl;
+    }
+};
+
+/**
+ * Represents an entire sale, containing multiple line items.
+ */
+class Sale {
+private:
+    vector<SalesLineItem> lineItems;
+public:
+    Sale() {}
+
+    void makeLineItem(const ProductSpecification &spec, int qty) {
+        // Create and store a new line item
+        SalesLineItem sli(spec, qty);
+        lineItems.push_back(sli);
+    }
+
+    void displayLineItems() const {
+        for (const auto &item : lineItems) {
+            item.display();
+        }
+    }
+};
+
+/**
+ * The 'POST' (Point Of Sale Terminal).
+ * Receives the 'enterItem' message and coordinates with Sale and ProductCatalog.
+ */
+class POST {
+private:
+    Sale* sale;               // Current sale in progress
+    ProductCatalog prodCatalog;
+    bool newSale;
+public:
+    POST() : sale(nullptr), newSale(true) {}
+
+    bool isNewSale() const {
+        return newSale;
+    }
+
+    /**
+     * enterItem(upc, qty):
+     *  1. If it's a new sale, create a new Sale.
+     *  2. Get the product specification from the catalog.
+     *  3. Tell the Sale to create a new SalesLineItem.
+     */
+    void enterItem(int upc, int qty) {
+        if (isNewSale()) {
+            sale = new Sale();
+            newSale = false;
+        }
+        ProductSpecification spec = prodCatalog.specification(upc);
+        sale->makeLineItem(spec, qty);
+    }
+
+    // Helper method to show what was added so far
+    void displaySale() const {
+        if (sale != nullptr) {
+            sale->displayLineItems();
+        } else {
+            cout << "No sale in progress.\n";
+        }
+    }
+};
+
+/**
+ * Demonstration in main().
+ */
+int main() {
+    POST post;
+
+    // Simulate entering two products
+    post.enterItem(12345, 2);  // 2 Apples
+    post.enterItem(67890, 3);  // 3 Bananas
+
+    // Show the resulting sale items
+    post.displaySale();
+
+    return 0;
+}
