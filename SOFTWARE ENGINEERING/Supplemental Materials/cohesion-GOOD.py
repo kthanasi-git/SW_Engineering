@@ -1,3 +1,12 @@
+# Payment Class
+class Payment:
+    def __init__(self, amount: float):
+        self.amount = amount
+        print(f"Payment of ${amount:.2f} created.")
+
+    def process(self):
+        print(f"Processing payment of ${self.amount:.2f}.")
+
 class Sale:
     def __init__(self):
         self.line_items = []
@@ -11,6 +20,11 @@ class Sale:
 
     def complete(self):
         self.is_complete = True
+
+    def make_payment(self):
+        print("Sale creates the Payment (GOOD DESIGN!)")
+        self.payment = Payment(self.total_amount)  # Sale is responsible for Payment creation
+        self.payment.process()
 
 
 class SaleLineItem:
