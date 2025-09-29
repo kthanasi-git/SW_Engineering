@@ -20,15 +20,29 @@ class OSModemAPI:
     def os_hangup():
         print("OS: Hanging up the modem.")
 
+class Comm:
+    def connect(self):
+        pass
+    
+    def send(self, data: str):
+        pass
 
-class Modem:
+    def receive(self) -> str:
+        pass
+
+    def disconnect(self):
+        pass
+
+class Modem(Comm):
     """
     Indirection layer that provides a consistent interface for modem operations
     and hides OS-specific details from the domain classes.
     """
+    def __init__(self, phone_number: str):
+        self.phone_number = phone_number
 
-    def dial(self, phone_number: str):
-        OSModemAPI.os_dial(phone_number)
+    def connect(self):
+        OSModemAPI.os_dial(self.phone_number)
 
     def send(self, data: str):
         OSModemAPI.os_send(data)
@@ -36,7 +50,7 @@ class Modem:
     def receive(self) -> str:
         return OSModemAPI.os_receive()
 
-    def hangup(self):
+    def disconnect(self):
         OSModemAPI.os_hangup()
 
 
@@ -46,22 +60,22 @@ class CreditAuthorizationService:
     It relies on the Modem interface rather than directly calling OS functions.
     """
 
-    def __init__(self, modem: Modem):
-        self._modem = modem  # Dependency injection
+    def __init__(self, modem: Comm):
+        self._comm = modem  # Dependency injection
 
     def authorize_payment(self, amount: float) -> bool:
         # The domain class doesn't handle low-level modem details
-        self._modem.dial("1-800-CREDIT")
+        self._comm.connect()
 
         # Construct a simple payment message
         message = f"PAYMENT: {amount:.2f}"
-        self._modem.send(message)
+        self._comm.send(message)
 
         # Get a response from the Modem (which delegates to the OS)
-        response = self._modem.receive()
+        response = self._comm.receive()
 
         # End the call
-        self._modem.hangup()
+        self._comm.disconnect()
 
         # Interpret the response
         if response == "AUTH_OK":
@@ -74,7 +88,7 @@ class CreditAuthorizationService:
 
 if __name__ == "__main__":
     # Create a Modem instance (our indirection layer)
-    modem = Modem()
+    modem = Modem("1-800-CREDIT")
 
     # Create the domain service, injecting the Modem dependency
     auth_service = CreditAuthorizationService(modem)
