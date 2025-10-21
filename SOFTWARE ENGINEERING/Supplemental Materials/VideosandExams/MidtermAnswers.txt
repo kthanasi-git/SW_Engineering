@@ -1,0 +1,86 @@
+16. (3 points) 
+Waterfall Model (Best when requirements are fixed) Choose Waterfall if:
+Requirements are well-defined and unlikely to change (e.g., compliance-heavy payroll systems).
+The client prefers detailed documentation and a linear sequence of phases (requirements → design → implementation → testing → deployment).  There is limited stakeholder involvement after initial planning.  The organization emphasizes predictability and control over adaptability.
+
+Agile Methodologies (Best when adaptability is needed) Choose Agile if:
+Requirements are evolving or not fully known upfront.  The client expects regular feedback and iterative improvements.  The team is cross-functional and collaborative.  The project benefits from early and continuous delivery of working software.
+
+17. (4 points).  System sequence diagram 
+https://photos.app.goo.gl/wvnEpfJUxd3PH9HE6
+Monitoring Devices is intentionally vague.  You can assume it's another external entity or an aggregate term for Wearable Devices and Environmental Monitoring.  If the latter then the adjustMonitoring message should go to both of those from the system
+
+:Healthcare Provider     :System SHMS    :WearDev       :EMS        :MonDev    
+──────────|───────────────────|──────────────|────────────|────────────|────────────
+          | Activate Opt. Mon.|              |            |            |
+          |──────────────────▶|              |            |            |
+          |                   |retrieveHdata |            |            |          
+          |                   |─────────────▶|            |            |
+          |                   |   DataResp   |            |            |
+          |                   |◀︎-------------|            |            |
+          |                   |       retrieveEData       |            |           
+          |                   |--------------------------▶|            |
+          |                   |         DataResp          |            |
+          |                   |◀︎--------------------------|            |
+          |                   |              |            |            |
+          |                   |◀︎-analyzeHdata|            |            |           
+          |                   |              |            |            |           
+          |                   |◀︎-calcPlan    |            |            |           
+          |                   |              |            |            |           
+          |                   | adjustMonitoringDevices   |            |           
+          |                   |---------------------------------------▶|
+          |  NotifyProvider   |              |            |            |
+          |◀︎----------------- |              |            |            |
+
+18. (8 points) Class Diagram.  
+Classes and Key Methods:
+User
+   * Initiates both operations
+
+SustainabilityController
+   * trackEnergyUsage()
+   * generateSustainabilityReport()
+
+EnergySensor
+   * collectData()
+
+EnergyUsageLog
+   * constructor() (ok to omit)
+   * fetchData()
+
+Notification
+   * sendAlert()
+
+ReportGenerator
+   * generateReport()
+
+Report
+   * constructor() (ok to omit)
+
+Associations:
+   * SustainabilityController → EnergySensor (uses)
+   * SustainabilityController → EnergyUsageLog (creates, fetches)
+   * SustainabilityController → Notification (triggers alerts)
+   * SustainabilityController → ReportGenerator (requests report generation)
+   * SustainabilityController → Report (creates report)
+
+19. (10 points). Grasp Patterns
+Controller Pattern
+   * PaymentController handles system operations (makePayPalPayment(), makeGiftCardPayment()).
+   * It mediates between the Customer and the payment classes, centralizing control logic.
+
+Creator Pattern
+   * PaymentController creates PayPalPayment and GiftCardPayment objects (createPayment() → create()).
+   * This follows GRASP Creator: the class that contains or uses another object is responsible for its creation.
+
+Expert Pattern:
+   * Payment (and it's children) have the necessary information to process_payment().
+
+Polymorphism Pattern
+   * Both PayPalPayment and GiftCardPayment implement a common interface (likely subclass of Payment) with a process() method.
+   * PaymentController can call processPayment() without knowing the specific payment type — achieving dynamic dispatch.
+
+Nice to have but less important than the other 4.
+Low Coupling / High Cohesion
+   * PaymentController interacts only with the Payment interface, not specific implementations.
+   * Keeps classes focused on single responsibilities (each payment type processes its own logic).
