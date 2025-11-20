@@ -1,0 +1,1 @@
+cat KingLear.txt | tr -cs '[:alpha:]' '\n' | tr 'A-Z' 'a-z' | awk 'length > 1' | sort | uniq -c | sort -n -r | head -10
